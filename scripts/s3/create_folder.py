@@ -3,7 +3,7 @@ from config.config import BUCKET_NAME,RAW_PREFIX,CURATED_PREFIX,PROCESSED_PREFIX
 
 def create_folder():
     folders =[
-        BUCKET_NAME,RAW_PREFIX,CURATED_PREFIX,PROCESSED_PREFIX,ATHENA_OUTPUT
+        RAW_PREFIX,CURATED_PREFIX,PROCESSED_PREFIX,ATHENA_OUTPUT
     ]
 
     for folder in folders:
