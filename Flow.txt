@@ -1,0 +1,230 @@
+================================================================================
+AWS DATA LAKE ETL PROJECT
+(S3 + Glue Catalog + Glue Crawlers + Glue ETL + Athena)
+================================================================================
+
+                        ┌────────────────────┐
+                        │   sales.csv        │
+                        │  (Local Machine)   │
+                        └─────────┬──────────┘
+                                  │
+                                  │ upload_file.py
+                                  ▼
+                    ┌───────────────────────────┐
+                    │       AWS S3              │
+                    │      RAW ZONE             │
+                    │ raw/sales/sales.csv       │
+                    └───────────┬───────────────┘
+                                │
+                                │ start_raw_crawler.py
+                                ▼
+                    ┌───────────────────────────┐
+                    │     Glue Raw Crawler      │
+                    └───────────┬───────────────┘
+                                │
+                                │ Scan CSV Schema
+                                ▼
+                    ┌───────────────────────────┐
+                    │     Glue Catalog          │
+                    │                           │
+                    │ Database : sales_db       │
+                    │ Table    : sales          │
+                    └───────────┬───────────────┘
+                                │
+                                │ Glue ETL Job
+                                ▼
+                    ┌───────────────────────────┐
+                    │   sales_etl_job.py        │
+                    │                           │
+                    │ Read Glue Catalog Table   │
+                    │ Remove Duplicates         │
+                    │ Remove Null Values        │
+                    │ Convert Datatypes         │
+                    │ Create Year Partition     │
+                    │ Create Month Partition    │
+                    │ Write Parquet             │
+                    └───────────┬───────────────┘
+                                │
+                                ▼
+                    ┌───────────────────────────┐
+                    │      AWS S3              │
+                    │    PROCESSED ZONE        │
+                    │                           │
+                    │ processed/sales/          │
+                    │ year=2025/month=1/        │
+                    │ year=2025/month=2/        │
+                    │ year=2026/month=5/        │
+                    └───────────┬───────────────┘
+                                │
+                                │ start_processed_crawler.py
+                                ▼
+                    ┌───────────────────────────┐
+                    │  Glue Processed Crawler   │
+                    └───────────┬───────────────┘
+                                │
+                                ▼
+                    ┌───────────────────────────┐
+                    │     Glue Catalog          │
+                    │                           │
+                    │ Database : sales_db       │
+                    │ Table    : processed_sales│
+                    └───────────┬───────────────┘
+                                │
+                                │ Athena Query
+                                ▼
+                    ┌───────────────────────────┐
+                    │       Athena              │
+                    │                           │
+                    │ Revenue Analysis          │
+                    │ Sales Trend Analysis      │
+                    │ Monthly Reports           │
+                    └───────────┬───────────────┘
+                                │
+                                ▼
+                    ┌───────────────────────────┐
+                    │ Business Insights         │
+                    │ Dashboard / Reports       │
+                    └───────────────────────────┘
+
+================================================================================
+PIPELINE ORCHESTRATION FLOW
+================================================================================
+
+run_pipeline.py
+
+    Phase 1
+    --------
+    create_bucket()
+          ↓
+    create_folders()
+          ↓
+    upload_file()
+          ↓
+    upload_glue_script()
+
+    Phase 2
+    --------
+    create_database()
+          ↓
+    create_raw_crawler()
+          ↓
+    start_raw_crawler()
+          ↓
+    crawler_status()
+
+    Phase 3
+    --------
+    create_job()
+          ↓
+    start_job()
+          ↓
+    check_job_status()
+          ↓
+    CSV → Parquet Conversion
+
+    Phase 4
+    --------
+    create_processed_crawler()
+          ↓
+    start_processed_crawler()
+          ↓
+    crawler_status()
+          ↓
+    processed_sales Table Created
+
+    Phase 5
+    --------
+    Athena Query Execution
+          ↓
+    Revenue Reports
+
+================================================================================
+DATA FLOW
+================================================================================
+
+Local CSV
+    ↓
+S3 Raw Zone
+    ↓
+Glue Crawler
+    ↓
+Glue Catalog Table
+    ↓
+Glue ETL (PySpark)
+    ↓
+Parquet Format
+    ↓
+S3 Processed Zone
+    ↓
+Processed Crawler
+    ↓
+Glue Catalog Table
+    ↓
+Athena
+    ↓
+Business Analytics
+
+================================================================================
+AWS SERVICES USED
+================================================================================
+
+1. IAM
+   - Authentication
+   - Authorization
+
+2. S3
+   - Raw Zone
+   - Processed Zone
+   - Script Storage
+   - Athena Results
+
+3. Glue Data Catalog
+   - Metadata Repository
+
+4. Glue Crawlers
+   - Automatic Schema Discovery
+
+5. Glue ETL
+   - Spark Based Transformation
+
+6. Parquet
+   - Columnar Storage
+   - Compression
+   - Faster Queries
+
+7. Athena
+   - Serverless SQL Analytics
+
+================================================================================
+PRODUCTION CONCEPTS LEARNED
+================================================================================
+
+✓ Data Lake Architecture
+✓ Raw Zone & Processed Zone
+✓ ETL Pipeline Design
+✓ Glue Crawlers
+✓ Glue Catalog
+✓ DynamicFrame
+✓ DataFrame
+✓ PySpark Transformations
+✓ Partitioning
+✓ Parquet Optimization
+✓ Athena Querying
+✓ Boto3 Automation
+✓ Pipeline Orchestration
+================================================================================
+
+
+
+AWS Data Lake ETL Project – Complete Theoretical Explanation-
+
+This project implements a complete AWS Data Lake ETL pipeline for processing retail sales data using S3, Glue, PySpark, Athena,
+and Boto3. The raw sales CSV file is first uploaded to Amazon S3, which serves as the Data Lake storage layer. A Glue Crawler 
+scans the raw data, automatically discovers its schema, and stores the metadata in the Glue Data Catalog. A Glue ETL job written
+in PySpark then reads the catalog table, performs data cleansing and transformation operations such as removing duplicates, 
+handling null values, converting data types, and generating partition columns. The transformed data is stored back in S3 in 
+Parquet format with year and month partitions to improve query performance and reduce storage costs. A second Glue Crawler 
+catalogs the processed data, making it available for querying through Amazon Athena. Athena uses the metadata from the Glue 
+Catalog to directly query the Parquet files stored in S3 without requiring any database servers. The entire workflow is automated
+using Boto3, demonstrating a production-style Data Lake architecture where S3 acts as the storage layer, Glue as the metadata 
+and ETL layer, and Athena as the analytics layer.
